@@ -1,0 +1,9 @@
+console:
+  indent-key: '.'
+  indent-value: '    '
+
+frame:
+  ignore-path:
+    - 'libs\\.*'
+    - 'libraries\\.*'
+    - 'versions\\.*'
