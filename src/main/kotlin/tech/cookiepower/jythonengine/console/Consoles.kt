@@ -1,13 +1,9 @@
 package tech.cookiepower.jythonengine.console
 
 import org.bukkit.entity.Player
-import org.bukkit.event.player.AsyncPlayerChatEvent
-import org.bukkit.event.player.PlayerQuitEvent
 import org.python.core.PyException
 import org.python.core.PyObject
 import org.python.util.PythonInterpreter
-import taboolib.common.platform.event.EventPriority
-import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.submit
 import taboolib.platform.util.sendLang
 import tech.cookiepower.jythonengine.JythonEnginePlugin.config
@@ -27,8 +23,6 @@ object Consoles {
     fun inSynch(uniqueId: UUID): Boolean = uuid2synch.contains(uniqueId)
     fun setSynch(uniqueId: UUID) = uuid2synch.add(uniqueId)
     fun unsetSynch(uniqueId: UUID) = uuid2synch.remove(uniqueId)
-
-    private fun haveBuffer(uniqueId: UUID): Boolean = (uuid2Buffer[uniqueId]?.length ?: 0) > 0
     private fun getBuffer(uniqueId: UUID): StringBuilder = uuid2Buffer[uniqueId] ?: StringBuilder().also { uuid2Buffer[uniqueId] = it }
 
     fun runRickCode(sender: Player, codeSingle: String){
@@ -63,7 +57,7 @@ object Consoles {
                         sender.sendLang("jython-console-executing", code)
                     exec(uniqueId,code)
                 }
-            }catch (e: PyException){
+            }catch (e: Throwable){
                 sender.sendLang("jython-console-error",e.message?:e.toString())
             }
         }

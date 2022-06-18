@@ -19,6 +19,10 @@ object ConsolesCommands {
     @CommandBody
     val create = subCommand {
         execute<ProxyCommandSender> { sender, _, _ ->
+            if(Consoles.haveInterpreter(sender.uniqueId)) {
+                sender.sendLang("jython-console-create-already-exists")
+                return@execute
+            }
             val event = PlayerCreateInterpreterEvent(sender.cast())
             event.call()
             if (event.isCancelled) { return@execute }
