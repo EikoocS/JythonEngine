@@ -1,19 +1,12 @@
-# Building
+![JythonEngine](docs/jythonengine.png)
+# JythonEngine
 
-* [Gradle](https://gradle.org/) - Dependency Management
+## Introduction
 
-The GradleWrapper in included in this project.
+JythonEngine is a wrapper of Jython, which can be used to control the server through the console, and can be used to get the output of the console at the same time. It supports two running modes, synchronous and asynchronous. It is compatible with Bukkit's thread unsafe, and can be used to achieve higher efficiency of running.
 
-**Windows:**
+Thanks to the Jython implementation, Python and Java can easily interoperate, giving Jython scripts the power of plug-ins, while Jython's own scripts can be run directly without a compiler, reducing the extra time spent on debugging and compiling and packaging.
 
-```
-gradlew.bat clean build
-```
+Interactive console with instant feedback for immediate operation, significantly reducing deployment time overhead
 
-**macOS/Linux:**
-
-```
-./gradlew clean build
-```
-
-Build artifacts should be found in `./build/libs` folder.
+[User Manual in zh_CN / 用户文档 中文](docs/user-manual.md)
