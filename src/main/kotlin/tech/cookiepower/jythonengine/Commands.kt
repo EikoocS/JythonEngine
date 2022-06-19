@@ -15,18 +15,20 @@ object Commands{
     @CommandBody
     val main = mainCommand {
         execute<ProxyCommandSender> { sender, _, _ ->
-            val uuid = sender.uniqueId
-            if (Consoles.inConsoles(uuid)) {
-                val event = PlayerLeaveConsolesModeEvent(sender.cast(), Consoles.getInterpreterOrNull(uuid))
+            val setting = Consoles.getSettings(sender.uniqueId)
+            if (setting.inConsoleMode()) {
+                val event = PlayerLeaveConsolesModeEvent(sender.cast(),setting.getInterpreterOrNull())
                 event.call()
                 if (event.isCancelled) { return@execute }
-                Consoles.exitConsole(uuid)
+
+                setting.disableConsoleMode()
                 sender.sendLang("jython-console-exit")
             } else {
-                val event = PlayerEnterConsolesModeEvent(sender.cast(),Consoles.getInterpreterOrNull(uuid))
+                val event = PlayerEnterConsolesModeEvent(sender.cast(),setting.getInterpreterOrNull())
                 event.call()
                 if(event.isCancelled){ return@execute }
-                Consoles.enterConsole(uuid)
+
+                setting.enableConsoleMode()
                 sender.sendLang("jython-console-enter")
             }
         }

@@ -71,7 +71,7 @@ object ScriptCommands {
                 }
                 "THIS" -> {
                     lazy {
-                        Consoles.getInterpreterOrNull(sender.uniqueId) ?: null.also {
+                        Consoles.getSettings(sender.uniqueId).getInterpreterOrNull() ?: null.also {
                             sender.sendLang("jython-console-not-initialized")
                         }
                     }
