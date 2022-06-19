@@ -13,9 +13,9 @@ object ConsolesHandler {
         val sender = event.player
         val uniqueId = sender.uniqueId
         val code = event.message
-        if(Consoles.inConsoles(uniqueId) && !code.startsWith("/")){
+        if(Consoles.getSettings(uniqueId).inConsoleMode() && !code.startsWith("/")){
             event.isCancelled = true
-            if(!Consoles.haveInterpreter(uniqueId)){
+            if(!Consoles.getSettings(uniqueId).hasInterpreter()){
                 sender.sendLang("jython-console-not-initialized")
                 return
             }
@@ -25,6 +25,6 @@ object ConsolesHandler {
 
     @SubscribeEvent
     fun onPlayerQuit(event: PlayerQuitEvent){
-        Consoles.unregisterUUID(event.player.uniqueId)
+        Consoles.removeSettings(event.player.uniqueId)
     }
 }
