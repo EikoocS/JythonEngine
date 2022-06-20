@@ -8,10 +8,6 @@ import taboolib.common.platform.command.mainCommand
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.submit
 import taboolib.module.lang.sendLang
-import tech.cookiepower.jythonengine.event.PlayerCleanInterpreterEvent
-import tech.cookiepower.jythonengine.event.PlayerCloseInterpreterEvent
-import tech.cookiepower.jythonengine.event.PlayerCreateInterpreterEvent
-import tech.cookiepower.jythonengine.event.PlayerReGetOutputEvent
 import tech.cookiepower.jythonengine.io.ProxyCommandSenderWriter
 import tech.cookiepower.jythonengine.util.uniqueId
 
@@ -20,7 +16,7 @@ object ConsolesCommands {
     @CommandBody
     val main = mainCommand {
         execute<ProxyCommandSender> { sender, _, _ ->
-            sender.sendLang("jython-console-help")
+            sender.sendLang("console-help")
         }
     }
 
@@ -29,21 +25,17 @@ object ConsolesCommands {
         execute<ProxyCommandSender> { sender, _, _ ->
             val setting = Consoles.getSettings(sender.uniqueId)
             if(setting.hasInterpreter()) {
-                sender.sendLang("jython-console-create-already-exists")
+                sender.sendLang("console-create-already-exists")
                 return@execute
             }
 
-            val event = PlayerCreateInterpreterEvent(sender.cast())
-            event.call()
-            if (event.isCancelled) { return@execute }
-
-            sender.sendLang("jython-console-creating")
+            sender.sendLang("console-creating")
             submit(async = true) {
                 val interpreter = PythonInterpreter()
-                interpreter.setErr(ProxyCommandSenderWriter(sender,"jython-console-error"))
-                interpreter.setOut(ProxyCommandSenderWriter(sender,"jython-console-output"))
+                interpreter.setErr(ProxyCommandSenderWriter(sender,"console-error"))
+                interpreter.setOut(ProxyCommandSenderWriter(sender,"console-output"))
                 setting.setInterpreter(interpreter)
-                sender.sendLang("jython-console-create")
+                sender.sendLang("console-create")
             }
         }
     }
@@ -53,15 +45,12 @@ object ConsolesCommands {
         execute<ProxyCommandSender> { sender, _, _ ->
             val setting = Consoles.getSettings(sender.uniqueId)
             if (!setting.hasInterpreter()) {
-                sender.sendLang("jython-console-close-not-exists")
+                sender.sendLang("console-close-not-exists")
                 return@execute
             }
-            val event = PlayerCloseInterpreterEvent(sender.cast(), setting.getInterpreter())
-            event.call()
-            if (event.isCancelled) { return@execute }
 
             setting.removeInterpreterAndClose()
-            sender.sendLang("jython-console-interpreter-close")
+            sender.sendLang("console-interpreter-close")
         }
     }
 
@@ -71,25 +60,21 @@ object ConsolesCommands {
             val setting = Consoles.getSettings(sender.uniqueId)
             val interpreter = setting.getInterpreter()
 
-            val event = PlayerCleanInterpreterEvent(sender.cast(), interpreter)
-            event.call()
-            if (event.isCancelled) { return@execute }
-
             interpreter.cleanup()
-            sender.sendLang("jython-console-interpreter-clean")
+            sender.sendLang("console-interpreter-clean")
         }
     }
 
     @CommandBody
-    val synch = subCommand {
+    val sync = subCommand {
         execute<ProxyCommandSender> { sender, _, _ ->
             val setting = Consoles.getSettings(sender.uniqueId)
-            if(setting.isSynch()){
-                setting.disableSynch()
-                sender.sendLang("jython-console-synch-off")
+            if(setting.isSync()){
+                setting.disableSync()
+                sender.sendLang("console-sync-off")
             }else{
-                setting.enableSynch()
-                sender.sendLang("jython-console-synch-on")
+                setting.enableSync()
+                sender.sendLang("console-sync-on")
             }
         }
     }
@@ -100,13 +85,16 @@ object ConsolesCommands {
             val setting = Consoles.getSettings(sender.uniqueId)
             val interpreter = setting.getInterpreter()
 
-            val event = PlayerReGetOutputEvent(sender.cast(), interpreter)
-            event.call()
-            if (event.isCancelled) { return@execute }
+            interpreter.setErr(ProxyCommandSenderWriter(sender,"console-error"))
+            interpreter.setOut(ProxyCommandSenderWriter(sender,"console-output"))
+            sender.sendLang("console-re-get-output")
+        }
+    }
 
-            interpreter.setErr(ProxyCommandSenderWriter(sender,"jython-console-error"))
-            interpreter.setOut(ProxyCommandSenderWriter(sender,"jython-console-output"))
-            sender.sendLang("jython-console-re-get-output")
+    @CommandBody
+    val help = subCommand {
+        execute<ProxyCommandSender> { sender, _, _ ->
+            sender.sendLang("console-help")
         }
     }
 }

@@ -6,49 +6,43 @@ import org.python.core.PyObject
 import taboolib.common.platform.function.submit
 import taboolib.platform.util.sendLang
 import tech.cookiepower.jythonengine.JythonEnginePlugin.config
-import tech.cookiepower.jythonengine.event.PlayerExecuteCodeEvent
 import tech.cookiepower.jythonengine.util.string
 import java.util.*
 
 object Consoles {
     private val uuid2Settings = HashMap<UUID, ConsoleSetting>()
-    private val indentKey : Char
+    private val indentKey
         get() = (config.getString("console.indent-key") ?: ".").toString().first()
-    private val indentValue : String
+    private val indentValue
         get() = config.string("console.indent-value") ?: "    "
 
     fun runRickCode(sender: Player, codeRaw: String){
         val uniqueId = sender.uniqueId
         val setting = getSettings(uniqueId)
         var code = formatIndent(indentKey, indentValue, codeRaw)
-        val interpreter = setting.getInterpreterOrNull() ?: return
         val needBuffer =codeRaw.startsWith(indentKey)||codeRaw.endsWith(":")
         val isEmptyExecute = codeRaw == indentKey.toString()
 
         if (needBuffer&&!isEmptyExecute) {
             setting.appendCodeToBuffer(code)
-            sender.sendLang("jython-console-executing-buffer", code)
+            sender.sendLang("console-executing-buffer", code)
             return
         }else{
             code = setting.buildAndClearBuffer(code)
         }
 
-        val event = PlayerExecuteCodeEvent(sender,interpreter,code)
-        event.call()
-        if(event.isCancelled){ return }
-
-        submit(async = !getSettings(uniqueId).isSynch()) {
+        submit(async = !getSettings(uniqueId).isSync()) {
             try {
                 if(code.startsWith("$")){
-                    sender.sendLang("jython-console-executing-with-value", code.substring(1))
+                    sender.sendLang("console-executing-with-value", code.substring(1))
                     val result = eval(uniqueId,code.substring(1))
-                    sender.sendLang("jython-console-result", result)
+                    sender.sendLang("console-result", result)
                 }else{
-                    if (!isEmptyExecute) sender.sendLang("jython-console-executing", code)
+                    if (!isEmptyExecute) sender.sendLang("console-executing", code)
                     exec(uniqueId,code)
                 }
             }catch (e: Throwable){
-                sender.sendLang("jython-console-error",e.message?:e.toString())
+                sender.sendLang("console-error",e.message?:e.toString())
             }
         }
     }

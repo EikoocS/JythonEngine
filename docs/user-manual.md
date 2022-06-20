@@ -34,7 +34,7 @@ JythonEngine 通过对 Jython 的封装可以实现使用 python 脚本来直接
   - create 创建解释器
   - close 关闭当前解释器
   - clean 清空当前解释器变量
-  - synch 切换同步执行/异步执行
+  - sync 切换同步执行/异步执行
   - get_output 重新获取当前解释器输出流
 
 //script

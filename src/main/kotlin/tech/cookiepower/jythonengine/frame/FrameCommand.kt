@@ -6,7 +6,6 @@ import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.module.lang.sendLang
 import tech.cookiepower.jythonengine.JythonEnginePlugin.config
@@ -19,7 +18,7 @@ object FrameCommand {
     // TODO 无法获取服务端API
     val reload = subCommand {
         execute<ProxyCommandSender> { sender, _, _ ->
-            sender.sendLang("jython-frame-reload-start")
+            sender.sendLang("frame-reload-start")
             submit(async = true) {
                 val libs = File(getDataFolder(),"libs")
                 getAllClass().forEach {
@@ -27,7 +26,7 @@ object FrameCommand {
                         FrameBuilder.build(PythonClass(it),libs)
                     }catch (_:Throwable){ }
                 }
-                sender.sendLang("jython-frame-reload-success")
+                sender.sendLang("frame-reload-success")
             }
         }
     }

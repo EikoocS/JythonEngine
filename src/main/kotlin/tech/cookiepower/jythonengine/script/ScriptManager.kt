@@ -1,37 +1,57 @@
 package tech.cookiepower.jythonengine.script
 
-import org.python.util.PythonInterpreter
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
-import taboolib.common.platform.function.submit
+import taboolib.common.platform.function.info
+import tech.cookiepower.jythonengine.event.ScriptLoadEvent
+import tech.cookiepower.jythonengine.event.ScriptUnloadEvent
+import java.io.File
 
 object ScriptManager {
+    val rootDir = File("./scripts")
     private val scripts = mutableListOf<Script>()
-    private val dataRegex = Regex("^#\\s*@(\\S*)\\s*(.*)$")
+    private val namespacedKeys = mutableListOf<NamespacedKey>()
 
-    private val interpreter = PythonInterpreter()
+    fun getScript(path: String): Script? = scripts.find { it.path == path }
+    fun getScript(key: NamespacedKey): Script? = scripts.find { it.namespacedKey == key }
 
-    fun getScripts(): List<Script> = scripts
-    fun getScript(name: String): Script? = scripts.find { it.name == name }
-    fun getScriptByPath(path: String): Script? = scripts.find { it.file.path == path }
+    private fun load(script: Script){
+        val namespacedKey = script.namespacedKey
+        if (namespacedKey != null && namespacedKey in namespacedKeys){
+            throw IllegalArgumentException("Can't load ${script.path} Script with namespaced key $namespacedKey " +
+                    "already loaded by ${getScript(namespacedKey)?.path}")
+        }
+        val event = ScriptLoadEvent(script)
+        if(event.call()){ return }
+        scripts.add(script)
+    }
+
+    private fun unload(script: Script){
+        ScriptUnloadEvent(script).call()
+        namespacedKeys.remove(script.namespacedKey)
+        scripts.remove(script)
+    }
+
+    private fun unRemoveUnload(script: Script){
+        ScriptUnloadEvent(script).call()
+        namespacedKeys.remove(script.namespacedKey)
+    }
+
+    fun loadScripts(){
+        rootDir.walk().filter {
+            it.isFile && it.extension == "jy"
+        }.forEach {
+            load(Script(it))
+        }
+    }
+
+    fun unloadScripts(){
+        scripts
+    }
 
     @Awake(LifeCycle.ENABLE)
-    fun reloadScripts() {
-        submit(async = true) {
-            scripts.clear()
-            Script.rootDir.walk().filter {
-                it.extension == "jy"
-            }.forEach {file ->
-                val script = Script(file)
-                file.readLines().forEach { line->
-                    if (dataRegex.find(line) != null) {
-                        val (key, value) = dataRegex.find(line)!!.destructured
-                        script.setData(key,value)
-                    }
-                }
-                script.compile(interpreter)
-                scripts.add(script)
-            }
-        }
+    fun reloadAllScripts(){
+        unloadScripts()
+        loadScripts()
     }
 }

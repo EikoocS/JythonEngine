@@ -1,37 +1,35 @@
 package tech.cookiepower.jythonengine.script
 
-import org.python.core.PyCode
-import org.python.util.PythonInterpreter
+import tech.cookiepower.jythonengine.script.ScriptManager.rootDir
 import java.io.File
-import java.io.FileReader
+import java.io.InputStream
 
 class Script(
-    val file: File,
-) {
-    private val data = HashMap<String, String?>()
+    private val file: File,
+){
+    val data = HashMap<String, String?>()
     val path : String
-        get() = file.absolutePath.removePrefix(rootDir.absolutePath)
-    var code: PyCode? = null
-    fun setData(key: String) = data.put(key, null)
-    fun setData(key: String, value: String?) = data.put(key, value)
-    fun getData(key: String): String? = data[key]
-    fun hasData(key: String): Boolean = data.containsKey(key)
+        get() = file.relativeTo(rootDir).path
 
-    fun compile(interpreter: PythonInterpreter): PyCode?{
-        code = interpreter.compile(FileReader(file),path)
-        return code
+    init {
+        file.readLines().forEach { line->
+            if (dataRegex.find(line) != null) {
+                val (key, value) = dataRegex.find(line)!!.destructured
+                this[key] = value
+            }
+        }
     }
+
+    operator fun get(key: String): String? = data[key]
+    operator fun set(key: String, value: String?) = data.put(key, value)
+    operator fun contains(key: String): Boolean = data.containsKey(key)
+    operator fun plusAssign(pair: Pair<String, String?>) { data[pair.first] = pair.second }
+    operator fun plusAssign(key: String) { data[key] = null }
+
+    fun getInputStream(): InputStream = file.inputStream()
+
     companion object{
-        val rootDir = File(".")
+        private val dataRegex = Regex("^#\\s*@(\\S*)\\s*(.*)$")
     }
 }
-
-val Script.name: String?
-    get() = getData("name")
-val Script.author: String?
-    get() = getData("author")
-val Script.version: String?
-    get() = getData("version")
-val Script.description: String?
-    get() = getData("description")
 

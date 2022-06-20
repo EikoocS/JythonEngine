@@ -5,7 +5,9 @@ import org.bukkit.event.player.PlayerQuitEvent
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.platform.util.sendLang
+import tech.cookiepower.jythonengine.annotation.ReflexCall
 
+@ReflexCall
 object ConsolesHandler {
 
     @SubscribeEvent(ignoreCancelled = true, priority = EventPriority.LOWEST)
@@ -16,7 +18,7 @@ object ConsolesHandler {
         if(Consoles.getSettings(uniqueId).inConsoleMode() && !code.startsWith("/")){
             event.isCancelled = true
             if(!Consoles.getSettings(uniqueId).hasInterpreter()){
-                sender.sendLang("jython-console-not-initialized")
+                sender.sendLang("console-not-initialized")
                 return
             }
             Consoles.runRickCode(sender, code)

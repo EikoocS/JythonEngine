@@ -6,7 +6,7 @@ class ConsoleSetting {
     private var consoleMode: Boolean = false
     private var interpreter : PythonInterpreter? = null
     private var buffer : StringBuilder = StringBuilder()
-    private var synch : Boolean = false
+    private var sync : Boolean = false
 
     fun inConsoleMode() : Boolean = consoleMode
     fun setConsoleMode(mode : Boolean) { consoleMode = mode }
@@ -23,10 +23,10 @@ class ConsoleSetting {
     }
     fun hasInterpreter() : Boolean = interpreter != null
 
-    fun isSynch() : Boolean = synch
-    fun setSynch(synch : Boolean) { this.synch = synch }
-    fun enableSynch() { synch = true }
-    fun disableSynch() { synch = false }
+    fun isSync() : Boolean = sync
+    fun setSync(sync : Boolean) { this.sync = sync }
+    fun enableSync() { sync = true }
+    fun disableSync() { sync = false }
 
     fun getBuffer() : StringBuilder = buffer
     fun appendCodeToBuffer(str : String) { buffer.append(str).append("\n") }
