@@ -20,8 +20,12 @@ object ScriptManager {
             throw IllegalArgumentException("Can't load ${script.path} Script with namespaced key $namespacedKey " +
                     "already loaded by ${getScript(namespacedKey)?.path}")
         }
+
         val event = ScriptLoadEvent(script)
-        if(event.call()){ return }
+        if(!event.call()){
+            ScriptUnloadEvent(script).call()
+            return
+        }
         scripts.add(script)
     }
 
@@ -41,14 +45,13 @@ object ScriptManager {
 
     fun unloadAll(){
         scripts.forEach {
-            namespacedKeys.remove(it.namespacedKey)
             ScriptUnloadEvent(it).call()
-            unload(it)
         }
+        namespacedKeys.clear()
         scripts.clear()
     }
 
-    @Awake(LifeCycle.ENABLE)
+    @Awake(LifeCycle.ACTIVE)
     fun reloadAll(){
         unloadAll()
         loadByDir()

@@ -9,8 +9,10 @@ object AsyncModifier : Modifier(){
     @SubscribeEvent(ignoreCancelled = true)
     fun onLoad(event: ScriptLoadEvent){
         val script = event.script
-        if (script.async && script.sync) throw IllegalArgumentException("Script cannot be async and sync at the same time")
-        event.isCancelled = true
+        if (script.async && script.sync){
+            event.isCancelled = true
+            throw IllegalArgumentException("Script cannot be async and sync at the same time")
+        }
     }
     @SubscribeEvent(ignoreCancelled = true)
     fun onExecute(event: ScriptExecuteEvent){

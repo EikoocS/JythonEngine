@@ -16,7 +16,7 @@ object StatusTrigger : Trigger<Unit>() {
         }
     }
 
-    @SubscribeEvent(ignoreCancelled = true)
+    @SubscribeEvent
     fun onScriptUnload(event: ScriptUnloadEvent){
         if(event.script.release){
             onUnsubscribe(event.script)

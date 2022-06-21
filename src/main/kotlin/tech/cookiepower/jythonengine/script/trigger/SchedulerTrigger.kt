@@ -2,7 +2,6 @@ package tech.cookiepower.jythonengine.script.trigger
 
 import org.python.util.PythonInterpreter
 import taboolib.common.platform.event.SubscribeEvent
-import taboolib.common.platform.function.info
 import tech.cookiepower.jythonengine.event.ScriptLoadEvent
 import tech.cookiepower.jythonengine.event.ScriptUnloadEvent
 import tech.cookiepower.jythonengine.script.Script
@@ -14,19 +13,13 @@ object SchedulerTrigger : Trigger<List<SchedulerTriggerTask>>(){
 
     @SubscribeEvent(ignoreCancelled = true)
     fun onScriptLoad(event: ScriptLoadEvent){
-        info("####################################################################################")
-        info("event subscriber: ScriptLoadEvent")
-        info("####################################################################################")
         if(event.script.isSchedulerScript){
             onSubscribe(event.script)
         }
     }
 
-    @SubscribeEvent(ignoreCancelled = true)
+    @SubscribeEvent
     fun onScriptUnload(event: ScriptUnloadEvent){
-        info("####################################################################################")
-        info("event subscriber: ScriptUnloadEvent")
-        info("####################################################################################")
         if(event.script.isSchedulerScript){
             onUnsubscribe(event.script)
         }
@@ -39,10 +32,11 @@ object SchedulerTrigger : Trigger<List<SchedulerTriggerTask>>(){
     }
 
     override fun onUnsubscribe(script: Script): Boolean {
-        val task = tasks.find { it.script == script }
-        task?.stop()
+        val task = tasks.find { it.script.path == script.path } ?:
+            throw IllegalStateException("Scheduler Script is not subscribed")
+        task.stop()
         tasks.remove(task)
-        return task!=null
+        return true
     }
 
     override fun getAll(): List<SchedulerTriggerTask> = tasks

@@ -1,7 +1,15 @@
 package tech.cookiepower.jythonengine.script.trigger
 
+import org.bukkit.Bukkit
+import org.bukkit.event.Event
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
+import taboolib.common.platform.Platform
+import taboolib.common.platform.PlatformSide
 import taboolib.common.platform.event.SubscribeEvent
+import taboolib.platform.BukkitPlugin
 import tech.cookiepower.jythonengine.annotation.ReflexCall
+import tech.cookiepower.jythonengine.event.ScriptExecuteEvent
 import tech.cookiepower.jythonengine.event.ScriptLoadEvent
 import tech.cookiepower.jythonengine.event.ScriptUnloadEvent
 import tech.cookiepower.jythonengine.script.Script
@@ -22,35 +30,27 @@ object EventTrigger : Trigger<Map<String, MutableList<Script>>>() {
         }
     }
 
-    @SubscribeEvent(ignoreCancelled = true)
+    @SubscribeEvent
     fun onScriptUnload(event: ScriptUnloadEvent){
         if(event.script.isEventScript){
             onUnsubscribe(event.script)
         }
     }
 
-//    @SubscribeEvent
-//    fun onEventCall(event: Event){
-//        event.javaClass.name.let {
-//            event2Scripts[it]?.forEach { script ->
-//                val exeEvent = ScriptExecuteEvent(script,defaultInterpreter)
-//                exeEvent.argument("__EVENT__" to event)
-//                defaultHandlerAndPost(exeEvent)
-//            }
-//        }
-//    }
+    @Awake(LifeCycle.ACTIVE)
+    @PlatformSide([Platform.BUKKIT])
+    fun registerListener(){
+        Bukkit.getPluginManager().registerEvents(EventListener(), BukkitPlugin.getInstance())
+    }
 
-//    @SubscribeEvent(bind = "org.bukkit.event.Event")
-//    fun onEventCall(ope: OptionalEvent){
-//        val event = ope.get<Event>()
-//        event.javaClass.name.let {
-//            event2Scripts[it]?.forEach { script ->
-//                val exeEvent = ScriptExecuteEvent(script,defaultInterpreter)
-//                exeEvent.argument("__EVENT__" to event)
-//                defaultHandlerAndPost(exeEvent)
-//            }
-//        }
-//    }
+    fun onEventCall(event: Event){
+        val name = event.javaClass.name
+        event2Scripts[name]?.forEach { script ->
+            val exeEvent = ScriptExecuteEvent(script,defaultInterpreter)
+            exeEvent.argument("__EVENT__" to event)
+            defaultHandlerAndPost(exeEvent)
+        }
+    }
 
     override fun onSubscribe(script: Script) {
         val events = script.events
