@@ -24,6 +24,9 @@ object SchedulerTrigger : Trigger<List<SchedulerTriggerTask>>(){
 
     @SubscribeEvent(ignoreCancelled = true)
     fun onScriptUnload(event: ScriptUnloadEvent){
+        info("####################################################################################")
+        info("event subscriber: ScriptUnloadEvent")
+        info("####################################################################################")
         if(event.script.isSchedulerScript){
             onUnsubscribe(event.script)
         }

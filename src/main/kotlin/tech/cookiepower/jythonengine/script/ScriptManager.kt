@@ -2,7 +2,6 @@ package tech.cookiepower.jythonengine.script
 
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
-import taboolib.common.platform.function.info
 import tech.cookiepower.jythonengine.event.ScriptLoadEvent
 import tech.cookiepower.jythonengine.event.ScriptUnloadEvent
 import java.io.File
@@ -32,26 +31,26 @@ object ScriptManager {
         scripts.remove(script)
     }
 
-    private fun unRemoveUnload(script: Script){
-        ScriptUnloadEvent(script).call()
-        namespacedKeys.remove(script.namespacedKey)
-    }
-
-    fun loadScripts(){
-        rootDir.walk().filter {
+    fun loadByDir(dir: File = rootDir){
+        dir.walk().filter {
             it.isFile && it.extension == "jy"
         }.forEach {
             load(Script(it))
         }
     }
 
-    fun unloadScripts(){
-        scripts
+    fun unloadAll(){
+        scripts.forEach {
+            namespacedKeys.remove(it.namespacedKey)
+            ScriptUnloadEvent(it).call()
+            unload(it)
+        }
+        scripts.clear()
     }
 
     @Awake(LifeCycle.ENABLE)
-    fun reloadAllScripts(){
-        unloadScripts()
-        loadScripts()
+    fun reloadAll(){
+        unloadAll()
+        loadByDir()
     }
 }

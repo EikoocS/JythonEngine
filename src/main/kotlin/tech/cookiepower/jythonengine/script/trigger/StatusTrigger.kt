@@ -1,6 +1,5 @@
 package tech.cookiepower.jythonengine.script.trigger
 
-import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.event.SubscribeEvent
 import tech.cookiepower.jythonengine.event.ScriptExecuteEvent
 import tech.cookiepower.jythonengine.event.ScriptLoadEvent

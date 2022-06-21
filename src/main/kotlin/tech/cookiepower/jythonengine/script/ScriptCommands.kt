@@ -27,7 +27,7 @@ object ScriptCommands {
     val reload = subCommand {
         execute<ProxyCommandSender> { sender, _, _ ->
             sender.sendLang("script-reloading")
-            ScriptManager.reloadAllScripts()
+            ScriptManager.reloadAll()
             sender.sendLang("script-reloaded")
         }
     }
